@@ -8,6 +8,7 @@ import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -20,22 +21,25 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.data.geo.Point;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReportService {
 
     private final ReportRepository reportRepository;
     private final GridFsTemplate gridFsTemplate;
     private final GridFSBucket gridFsBucket;
+    private final Random random = new Random();
 
     // ✅ Submit new report
     public ReportResponse submitReport(ReportRequest request, List<MultipartFile> files) throws IOException {
@@ -53,15 +57,19 @@ public class ReportService {
                 .userId(getCurrentUserId())
                 .type(request.getType())
                 .description(request.getDescription())
-                .location(new org.springframework.data.geo.Point(request.getLon(), request.getLat()))
+                .location(new Point(request.getLon(), request.getLat()))
                 .observedAt(request.getObservedAt() != null ? request.getObservedAt() : Instant.now())
                 .submittedAt(Instant.now())
                 .mediaFileIds(fileIds)
                 .verified(false)
+                .source(request.getSource() != null ? request.getSource() : "USER") // 🔹 Use source from request, or default to "USER"
                 .build();
 
         return toResponse(reportRepository.save(report));
     }
+    
+    // ✅ This method is no longer needed as the logic is handled in submitReport
+    // public void generateMockReport() { ... }
 
     // ✅ Get reports of current user
     public List<ReportResponse> getMyReports() {
@@ -156,14 +164,15 @@ public class ReportService {
 
         report.setType(request.getType());
         report.setDescription(request.getDescription());
-        report.setLocation(new org.springframework.data.geo.Point(request.getLon(), request.getLat()));
+        report.setLocation(new Point(request.getLon(), request.getLat()));
         report.setObservedAt(request.getObservedAt() != null ? request.getObservedAt() : report.getObservedAt());
         report.setMediaFileIds(fileIds);
+        report.setSource("USER"); // 🔹 Only a user can update their report, so source remains "USER"
 
         return toResponse(reportRepository.save(report));
     }
 
-    // ✅ Delete report
+    // ✅ Delete single report
     public ReportResponse deleteReport(String id) {
         Optional<Report> reportOpt = reportRepository.findById(id);
         if (reportOpt.isEmpty()) return null;
@@ -183,6 +192,24 @@ public class ReportService {
         return toResponse(report);
     }
 
+    // ✅ Delete all reports (optionally filtered by source)
+    public void deleteAllReports(Optional<String> sourceFilter) {
+        log.warn("Deleting reports. Filter: {}", sourceFilter.orElse("ALL"));
+
+        if (sourceFilter.isPresent()) {
+            List<Report> reportsToDelete = reportRepository.findAll()
+                    .stream()
+                    .filter(r -> r.getSource() != null &&
+                            r.getSource().toLowerCase().contains(sourceFilter.get().toLowerCase()))
+                    .toList();
+
+            reportRepository.deleteAll(reportsToDelete);
+            log.info("Deleted {} reports with source containing '{}'", reportsToDelete.size(), sourceFilter.get());
+        } else {
+            reportRepository.deleteAll();
+            log.info("Deleted ALL reports");
+        }
+    }
 
     // ✅ Helper: get current user ID
     private String getCurrentUserId() {
@@ -203,6 +230,7 @@ public class ReportService {
                 .submittedAt(report.getSubmittedAt())
                 .mediaFileIds(report.getMediaFileIds())
                 .verified(report.isVerified())
+                .source(report.getSource())
                 .build();
     }
 }

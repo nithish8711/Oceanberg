@@ -10,4 +10,5 @@ public class ReportRequest {
     private double lon;
     private double lat;
     private Instant observedAt;
+    private String source;
 }

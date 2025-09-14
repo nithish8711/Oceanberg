@@ -3,6 +3,7 @@ package com.oceanberg.backend.controller;
 import com.oceanberg.backend.service.INCOISService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/incois")
@@ -38,7 +39,7 @@ public class INCOISController {
 
     @DeleteMapping("/alerts")
     public String deleteAllAlerts() {
-        incoisService.deleteAllAlerts();
+        incoisService.deleteAllAlerts(Optional.empty());;
         return "All ocean alert data has been deleted.";
     }
 }

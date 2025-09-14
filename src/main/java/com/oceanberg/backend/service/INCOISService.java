@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -39,6 +40,7 @@ public class INCOISService {
      * Generates and stores random mock ocean alert data for testing purposes.
      */
     public void generateMockData() {
+        log.info("Starting mock data generation.");
         int count = 0;
         
         // 1. Generate Tsunami events
@@ -61,6 +63,7 @@ public class INCOISService {
             repository.save(createMockTideGauge());
             count++;
         }
+        log.info("Finished generating {} mock alerts.", count);
     }
     
     private OceanAlert createMockTsunami() {
@@ -76,7 +79,7 @@ public class INCOISService {
                 .severity(severity)
                 .magnitude(Double.parseDouble(String.format("%.1f", magnitude)))
                 .advisory("Mock Tsunami Advisory for " + location)
-                .source("MOCK_INCOIS")
+                .source("MOCK_INCOIS") // 🔹 Set source to "MOCK_INCOIS"
                 .build();
     }
 
@@ -93,7 +96,7 @@ public class INCOISService {
                 .severity(severity)
                 .magnitude(Double.parseDouble(String.format("%.2f", magnitude)))
                 .advisory("Mock Storm Surge Advisory for " + location)
-                .source("MOCK_INCOIS")
+                .source("MOCK_INCOIS") // 🔹 Set source to "MOCK_INCOIS"
                 .build();
     }
 
@@ -110,7 +113,7 @@ public class INCOISService {
                 .severity(severity)
                 .magnitude(Double.parseDouble(String.format("%.2f", magnitude)))
                 .advisory("Mock Tide Gauge Reading for " + location)
-                .source("MOCK_INCOIS")
+                .source("MOCK_INCOIS") // 🔹 Set source to "MOCK_INCOIS"
                 .build();
     }
     
@@ -118,6 +121,7 @@ public class INCOISService {
      * Fetches Tsunami Alerts from the INCOIS XML feed.
      */
     public void fetchTsunamiAlerts() {
+        log.info("Fetching tsunami alerts from INCOIS...");
         try {
             String xml = webClient.get()
                     .uri(TSUNAMI_FEED)
@@ -126,7 +130,7 @@ public class INCOISService {
                     .block();
 
             if (xml == null || xml.isBlank()) {
-                // No log here, as this is a non-error case
+                log.info("No new tsunami alerts available.");
                 return;
             }
 
@@ -141,7 +145,10 @@ public class INCOISService {
                 Double magnitude = safeParseDouble(getTagValue(e, "Magnitude"));
                 LocalDateTime alertTime = LocalDateTime.now();
 
-                if (alertExists("Tsunami", location, alertTime.toLocalDate())) continue;
+                if (alertExists("Tsunami", location, alertTime.toLocalDate())) {
+                    log.info("Alert for Tsunami at {} already exists. Skipping.", location);
+                    continue;
+                }
 
                 OceanAlert alert = OceanAlert.builder()
                         .type("Tsunami")
@@ -151,12 +158,13 @@ public class INCOISService {
                         .severity("High")
                         .magnitude(magnitude)
                         .advisory("Tsunami alert from INCOIS")
-                        .source("INCOIS")
+                        .source("INCOIS") // 🔹 Set source to "INCOIS" for real data
                         .build();
 
                 repository.save(alert);
                 savedCount++;
             }
+            log.info("Successfully fetched and saved {} new tsunami alerts.", savedCount);
         } catch (Exception e) {
             log.error("Failed to fetch tsunami alerts.", e);
         }
@@ -166,6 +174,7 @@ public class INCOISService {
      * Fetches Tide Gauge Data from the INCOIS XML feed.
      */
     public void fetchTideStations() {
+        log.info("Fetching tide station data from INCOIS...");
         try {
             String xml = webClient.get()
                     .uri(TIDE_FEED)
@@ -174,7 +183,7 @@ public class INCOISService {
                     .block();
 
             if (xml == null || xml.isBlank()) {
-                // No log here, as this is a non-error case
+                log.info("No new tide station data available.");
                 return;
             }
 
@@ -192,7 +201,10 @@ public class INCOISService {
                 String status = getTagValue(e, "Status");
                 LocalDateTime alertTime = LocalDateTime.now();
 
-                if (alertExists("Tide Gauge", name, alertTime.toLocalDate())) continue;
+                if (alertExists("Tide Gauge", name, alertTime.toLocalDate())) {
+                    log.info("Alert for Tide Gauge at {} already exists. Skipping.", name);
+                    continue;
+                }
 
                 OceanAlert alert = OceanAlert.builder()
                         .type("Tide Gauge")
@@ -202,12 +214,13 @@ public class INCOISService {
                         .severity(status != null ? status : "Normal")
                         .magnitude(magnitude)
                         .advisory("Sea level observation from Tide Gauge")
-                        .source("INCOIS")
+                        .source("INCOIS") // 🔹 Set source to "INCOIS" for real data
                         .build();
 
                 repository.save(alert);
                 savedCount++;
             }
+            log.info("Successfully fetched and saved {} new tide gauge readings.", savedCount);
         } catch (Exception e) {
             log.error("Failed to fetch tide stations.", e);
         }
@@ -217,6 +230,7 @@ public class INCOISService {
      * Fetches Storm Surge Data from the INCOIS GeoJSON feed.
      */
     public void fetchStormSurgeAlerts() {
+        log.info("Fetching storm surge alerts from INCOIS...");
         try {
             String json = webClient.get()
                     .uri(STORM_SURGE_FEED)
@@ -225,7 +239,7 @@ public class INCOISService {
                     .block();
 
             if (json == null || json.isBlank()) {
-                // No log here, as this is a non-error case
+                log.info("No new storm surge alerts available.");
                 return;
             }
 
@@ -241,7 +255,10 @@ public class INCOISService {
                     Double surgeHeight = properties.path("SURGE_HEIGHT_M").asDouble(0.0);
                     LocalDateTime alertTime = LocalDateTime.now();
 
-                    if (alertExists("Cyclone/Storm Surge", location, alertTime.toLocalDate())) continue;
+                    if (alertExists("Cyclone/Storm Surge", location, alertTime.toLocalDate())) {
+                        log.info("Alert for Storm Surge at {} already exists. Skipping.", location);
+                        continue;
+                    }
 
                     OceanAlert alert = OceanAlert.builder()
                             .type("Cyclone/Storm Surge")
@@ -251,13 +268,14 @@ public class INCOISService {
                             .severity("High")
                             .magnitude(surgeHeight)
                             .advisory("Storm Surge Advisory: " + advisory)
-                            .source("INCOIS")
+                            .source("INCOIS") // 🔹 Set source to "INCOIS" for real data
                             .build();
 
                     repository.save(alert);
                     savedCount++;
                 }
             }
+            log.info("Successfully fetched and saved {} new storm surge alerts.", savedCount);
         } catch (Exception e) {
             log.error("Failed to fetch storm surge alerts.", e);
         }
@@ -287,7 +305,17 @@ public class INCOISService {
         }
     }
 
-    public void deleteAllAlerts() {
-        repository.deleteAll();
+    public void deleteAllAlerts(Optional<String> sourceFilter) {
+        log.warn("Deleting ocean alerts. Filter: {}", sourceFilter.orElse("ALL"));
+        if (sourceFilter.isPresent()) {
+            repository.deleteAll(
+                repository.findAll()
+                        .stream()
+                        .filter(alert -> sourceFilter.get().equalsIgnoreCase(alert.getSource()))
+                        .toList()
+            );
+        } else {
+            repository.deleteAll();
+        }
     }
 }

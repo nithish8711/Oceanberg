@@ -80,4 +80,13 @@ public class ReportController {
         }
         return ResponseEntity.ok(deletedReport);
     }
+
+    // ✅ Delete all reports (optionally filter by source: USER / MOCK)
+    @DeleteMapping("/all")
+    public ResponseEntity<String> deleteAllReports(@RequestParam(required = false) String source) {
+        reportService.deleteAllReports(source == null ? java.util.Optional.empty() : java.util.Optional.of(source));
+        return ResponseEntity.ok(source == null
+                ? "All reports deleted."
+                : "All reports with source=" + source + " deleted.");
+    }
 }

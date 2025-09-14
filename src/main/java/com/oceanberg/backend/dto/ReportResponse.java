@@ -19,4 +19,5 @@ public class ReportResponse {
     private Instant submittedAt;
     private List<String> mediaFileIds;
     private boolean verified;
+    private String source;
 }

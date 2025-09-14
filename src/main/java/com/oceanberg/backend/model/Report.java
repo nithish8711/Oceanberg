@@ -24,4 +24,5 @@ public class Report {
     private Instant submittedAt;
     private List<String> mediaFileIds; // GridFS file ids
     private boolean verified;
+    private String source; // e.g. "USER", "MOCK_REPORT"
 }
