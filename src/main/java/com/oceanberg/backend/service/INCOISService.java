@@ -14,7 +14,11 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Slf4j
@@ -34,8 +38,6 @@ public class INCOISService {
             "https://sarat.incois.gov.in/incoismobileappdata/rest/incois/hwassalatestdata";
     private static final String CURRENT_FEED =
             "https://samudra.incois.gov.in/incoismobileappdata/rest/incois/currentslatestdata";
-    private static final String TSUNAMI_FEED =
-            "https://tsunami.incois.gov.in/itews/homexmls/LatestEvents.xml";
 
     // Coastal districts map for mock data
     private static final Map<String, String[]> COASTAL_LOCATIONS = Map.of(
@@ -201,8 +203,13 @@ public class INCOISService {
 
     public void fetchTsunamiAlerts() {
         try {
-            log.info("Fetching Tsunami Alerts...");
-            String xml = webClient.get().uri(TSUNAMI_FEED).retrieve().bodyToMono(String.class).block();
+            log.info("Fetching Tsunami Station Alerts...");
+            String xml = webClient.get()
+                    .uri("https://tsunami.incois.gov.in/itews/homexmls/BprStations.xml?currentTime=" + System.currentTimeMillis())
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
             if (xml == null || xml.isBlank()) return;
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -210,24 +217,38 @@ public class INCOISService {
             org.w3c.dom.Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes()));
             doc.getDocumentElement().normalize();
 
-            NodeList events = doc.getElementsByTagName("Event");
+            NodeList stations = doc.getElementsByTagName("station");
             List<OceanAlert> alerts = new ArrayList<>();
+            Instant recentTimeWindow = Instant.now().minus(3, ChronoUnit.DAYS);
 
-            for (int i = 0; i < events.getLength(); i++) {
-                org.w3c.dom.Node node = events.item(i);
+            for (int i = 0; i < stations.getLength(); i++) {
+                org.w3c.dom.Node node = stations.item(i);
                 if (node.getNodeType() != org.w3c.dom.Node.ELEMENT_NODE) continue;
 
                 org.w3c.dom.Element elem = (org.w3c.dom.Element) node;
 
-                String region = getTagTextContent(elem, "Region");
-                String magnitude = getTagTextContent(elem, "Magnitude");
-                String latitude = getTagTextContent(elem, "Latitude");
-                String longitude = getTagTextContent(elem, "Longitude");
-                String dateTime = getTagTextContent(elem, "DateTime");
+                String status = elem.getAttribute("status");
+                String stationName = getTagTextContent(elem, "statname");
+                if (!"Reporting".equalsIgnoreCase(status)) {
+                    log.info("Skipping station {} because status is '{}'", stationName, status);
+                    continue;
+                }
 
-                double lat = latitude.isBlank() ? 0 : Double.parseDouble(latitude);
-                double lon = longitude.isBlank() ? 0 : Double.parseDouble(longitude);
+                double lat = parseDoubleSafe(getTagTextContent(elem, "latitude"));
+                double lon = parseDoubleSafe(getTagTextContent(elem, "longitude"));
                 String[] districtState = GeoUtil.resolveDistrictState(lat, lon);
+
+                String stationRealName = getTagTextContent(elem, "statrealName");
+                String country = getTagTextContent(elem, "country");
+                String owner = getTagTextContent(elem, "owner");
+                String colorClass = getTagTextContent(elem, "colorClass");
+                String dateStr = getTagTextContent(elem, "date"); // e.g., "2025-Sep-16 07:00"
+
+                Instant alertTime = parseStationDate(dateStr);
+                if (alertTime == null || alertTime.isBefore(recentTimeWindow)) {
+                    log.debug("Skipping old tsunami station {} (date={})", stationName, dateStr);
+                    continue;
+                }
 
                 OceanAlert alert = OceanAlert.builder()
                         .type("Tsunami")
@@ -235,30 +256,49 @@ public class INCOISService {
                         .state(districtState[1])
                         .latitude(lat)
                         .longitude(lon)
-                        .color("Red")
-                        .message("Tsunami Event in " + region)
+                        .color(colorClass.isBlank() ? "UNKNOWN" : colorClass.toUpperCase())
+                        .message("Tide Station " + stationName + " (" + country + ") - Status: " + status)
                         .source("INCOIS")
-                        .issueDate(LocalDateTime.now())
+                        .issueDate(LocalDateTime.ofInstant(alertTime, ZoneId.systemDefault()))
                         .details(Map.of(
-                                "region", region,
-                                "magnitude", magnitude,
-                                "event_time", dateTime
+                                "station_code", stationName,
+                                "station_real_name", stationRealName,
+                                "country", country,
+                                "owner", owner,
+                                "status", status,
+                                "raw_date", dateStr
                         ))
                         .build();
 
-                alerts.add(alert);
+                if (!isDuplicateAlert(alert)) alerts.add(alert);
             }
 
-            // Filter duplicates
-            List<OceanAlert> alertsToSave = alerts.stream()
-                    .filter(alert -> !isDuplicateAlert(alert))
-                    .toList();
-
-            if (!alertsToSave.isEmpty()) repository.saveAll(alertsToSave);
-            log.info("Tsunami alerts parsed and saved: {}", alertsToSave.size());
+            if (!alerts.isEmpty()) {
+                repository.saveAll(alerts);
+                log.info("Saved {} tsunami station alerts.", alerts.size());
+            }
 
         } catch (Exception e) {
             log.error("Tsunami fetch failed", e);
+        }
+    }
+
+    private double parseDoubleSafe(String s) {
+        try {
+            return s == null || s.isBlank() ? 0 : Double.parseDouble(s);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    private Instant parseStationDate(String dateStr) {
+        try {
+            if (dateStr == null || dateStr.isBlank()) return null;
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm", Locale.ENGLISH);
+            return LocalDateTime.parse(dateStr, formatter).atZone(ZoneId.systemDefault()).toInstant();
+        } catch (Exception e) {
+            log.warn("Failed to parse tsunami station date '{}': {}", dateStr, e.getMessage());
+            return null;
         }
     }
 
@@ -334,18 +374,47 @@ public class INCOISService {
     }
 
     private String[] extractDistrictState(String message) {
-        if (message == null || message.isBlank()) return new String[]{"UNKNOWN", "UNKNOWN"};
-        String searchText = "for the coast of ";
-        int startIndex = message.toLowerCase().indexOf(searchText);
-        if (startIndex != -1) {
-            int endIndex = message.toLowerCase().indexOf("from", startIndex);
-            String districtStateStr;
-            if (endIndex != -1) districtStateStr = message.substring(startIndex + searchText.length(), endIndex).trim();
-            else districtStateStr = message.substring(startIndex + searchText.length()).trim();
-            String[] parts = districtStateStr.split(",");
-            if (parts.length == 2) return new String[]{parts[0].trim().toUpperCase(), parts[1].trim().toUpperCase()};
+        if (message == null || message.isBlank()) {
+            return new String[]{"UNKNOWN", "UNKNOWN"};
         }
-        return new String[]{"UNKNOWN", "UNKNOWN"};
+
+        String searchText = "for the coast of ";
+        String lowerMsg = message.toLowerCase();
+
+        int startIndex = lowerMsg.indexOf(searchText);
+        if (startIndex == -1) {
+            return new String[]{"UNKNOWN", "UNKNOWN"};
+        }
+
+        // Start after "for the coast of "
+        int extractStart = startIndex + searchText.length();
+
+        // Look for " from " or "." to determine end of district/state
+        int fromIndex = lowerMsg.indexOf(" from ", extractStart);
+        int dotIndex = lowerMsg.indexOf(".", extractStart);
+
+        int extractEnd;
+        if (fromIndex != -1 && dotIndex != -1) {
+            extractEnd = Math.min(fromIndex, dotIndex);
+        } else if (fromIndex != -1) {
+            extractEnd = fromIndex;
+        } else if (dotIndex != -1) {
+            extractEnd = dotIndex;
+        } else {
+            extractEnd = message.length();
+        }
+
+        String districtStateStr = message.substring(extractStart, extractEnd).trim();
+
+        // Split by comma
+        String[] parts = districtStateStr.split(",");
+        if (parts.length >= 2) {
+            return new String[]{parts[0].trim().toUpperCase(), parts[1].trim().toUpperCase()};
+        } else if (parts.length == 1) {
+            return new String[]{parts[0].trim().toUpperCase(), "UNKNOWN"};
+        } else {
+            return new String[]{"UNKNOWN", "UNKNOWN"};
+        }
     }
 
     private String getTagTextContent(org.w3c.dom.Element elem, String tagName) {

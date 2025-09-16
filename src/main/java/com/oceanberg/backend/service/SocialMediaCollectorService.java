@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.data.geo.Point;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -36,28 +35,14 @@ public class SocialMediaCollectorService {
     @Value("${rapidapi.key.instagram}")
     private String instagramRapidApiKey;
 
-    // Collect posts from a user report
-     public Set<String> getKeywordsFromReport(Report report) {
-        Set<String> keywords = new HashSet<>();
-        if (report.getType() != null) keywords.add(report.getType().toLowerCase());
-        if (report.getDescription() != null) keywords.add(report.getDescription().toLowerCase());
-        if (report.getDistrict() != null) keywords.add(report.getDistrict().toLowerCase());
-        if (report.getState() != null) keywords.add(report.getState().toLowerCase());
-        if (report.getSubmittedAt() != null) keywords.add(report.getSubmittedAt().toString());
-        return keywords;
-    }
+    // -----------------------------------
+    // Keyword result for OceanAlert processing
+    // -----------------------------------
+    public record AlertKeywordResult(boolean processed, Set<String> keywords, String reason) {}
 
-    public Set<String> getKeywordsFromAlert(OceanAlert alert) {
-        Set<String> keywords = new HashSet<>();
-        if (alert.getType() != null) keywords.add(alert.getType().toLowerCase());
-        if (alert.getDistrict() != null) keywords.add(alert.getDistrict().toLowerCase());
-        if (alert.getState() != null) keywords.add(alert.getState().toLowerCase());
-        if (alert.getColor() != null) keywords.add(alert.getColor().toLowerCase());
-        if (alert.getIssueDate() != null) keywords.add(alert.getIssueDate().toString());
-        return keywords;
-    }
-
-    // COLLECT POSTS
+    // -----------------------------------
+    // Collect from user report
+    // -----------------------------------
     public void collectFromReport(Report report) {
         if (!"USER".equalsIgnoreCase(report.getSource())) return;
 
@@ -68,16 +53,86 @@ public class SocialMediaCollectorService {
         keywords.forEach(keyword -> collectForKeywordWithType(keyword, Optional.of(recentTimeWindow), hazardType));
     }
 
-    public void collectFromOceanAlert(OceanAlert alert) {
-        if (!"INCOIS".equalsIgnoreCase(alert.getSource())) return;
+    // -----------------------------------
+    // Collect from OceanAlert with enhanced keyword logic and color filtering
+    // -----------------------------------
+    public AlertKeywordResult collectFromOceanAlert(OceanAlert alert) {
+        if (!"INCOIS".equalsIgnoreCase(alert.getSource())) {
+            return new AlertKeywordResult(false, Collections.emptySet(), "Alert source is not INCOIS");
+        }
 
-        String hazardType = alert.getType();
-        Set<String> keywords = getKeywordsFromAlert(alert);
+        // Color-based filtration
+        String color = alert.getColor() != null ? alert.getColor().toUpperCase() : "";
+        boolean validColor = switch (alert.getType().toLowerCase()) {
+            case "cyclone" -> color.equals("ORANGE") || color.equals("RED");
+            case "high wave", "ocean current", "tsunami" -> color.equals("RED");
+            default -> true; // fallback: accept any color
+        };
+
+        if (!validColor) {
+            return new AlertKeywordResult(false, Collections.emptySet(),
+                    "No valid condition for generating keywords. Color '" + color + "' does not meet criteria for " + alert.getType());
+        }
+
+        Set<String> keywords = new HashSet<>();
+
+        // Basic keywords
+        if (alert.getType() != null) keywords.add(alert.getType().toLowerCase());
+        if (alert.getDistrict() != null) keywords.add(alert.getDistrict().toLowerCase());
+        if (alert.getState() != null) keywords.add(alert.getState().toLowerCase());
+        if (!color.isBlank()) keywords.add(color.toLowerCase());
+
+        // Add date/time based on alert type from details
+        Map<String, String> details = alert.getDetails() != null ? alert.getDetails() : Collections.emptyMap();
+        switch (alert.getType().toLowerCase()) {
+            case "tsunami" -> { if (details.containsKey("raw_date")) keywords.add(details.get("raw_date").toLowerCase()); }
+            case "cyclone" -> { if (details.containsKey("date_time")) keywords.add(details.get("date_time").toLowerCase()); }
+            case "high wave", "ocean current" -> { if (details.containsKey("issue_date")) keywords.add(details.get("issue_date").toLowerCase()); }
+            default -> { if (alert.getIssueDate() != null) keywords.add(alert.getIssueDate().toString().toLowerCase()); }
+        }
+
+        if (keywords.isEmpty()) {
+            return new AlertKeywordResult(false, Collections.emptySet(), "No keywords could be generated from alert details");
+        }
+
+        // Recent time window
         Instant recentTimeWindow = Instant.now().minus(3, ChronoUnit.DAYS);
 
-        keywords.forEach(keyword -> collectForKeywordWithType(keyword, Optional.of(recentTimeWindow), hazardType));
+        // Collect posts
+        keywords.forEach(keyword -> collectForKeywordWithType(keyword, Optional.of(recentTimeWindow), alert.getType()));
+
+        return new AlertKeywordResult(true, keywords, "Keywords generated and posts collected successfully");
     }
 
+    // -----------------------------------
+    // Extract keywords from report
+    // -----------------------------------
+    public Set<String> getKeywordsFromReport(Report report) {
+        Set<String> keywords = new HashSet<>();
+        if (report.getType() != null) keywords.add(report.getType().toLowerCase());
+        if (report.getDescription() != null) keywords.add(report.getDescription().toLowerCase());
+        if (report.getDistrict() != null) keywords.add(report.getDistrict().toLowerCase());
+        if (report.getState() != null) keywords.add(report.getState().toLowerCase());
+        if (report.getSubmittedAt() != null) keywords.add(report.getSubmittedAt().toString());
+        return keywords;
+    }
+
+    // -----------------------------------
+    // Extract keywords from alert (basic)
+    // -----------------------------------
+    public Set<String> getKeywordsFromAlert(OceanAlert alert) {
+        Set<String> keywords = new HashSet<>();
+        if (alert.getType() != null) keywords.add(alert.getType().toLowerCase());
+        if (alert.getDistrict() != null) keywords.add(alert.getDistrict().toLowerCase());
+        if (alert.getState() != null) keywords.add(alert.getState().toLowerCase());
+        if (alert.getColor() != null) keywords.add(alert.getColor().toLowerCase());
+        if (alert.getIssueDate() != null) keywords.add(alert.getIssueDate().toString());
+        return keywords;
+    }
+
+    // -----------------------------------
+    // Collect posts for given keyword
+    // -----------------------------------
     public void collectForKeywordWithType(String keyword, Optional<Instant> fromDate, String type) {
         if (keyword == null || keyword.isEmpty()) return;
 
@@ -100,7 +155,9 @@ public class SocialMediaCollectorService {
                         facebookRapidApiKey), type);
     }
 
-    // SAVE POSTS
+    // -----------------------------------
+    // Save raw post to MongoDB
+    // -----------------------------------
     private void saveRawPostWithType(String platform, String keyword, Map<String, Object> raw, String type) {
         if (raw == null || raw.isEmpty()) return;
 
@@ -121,14 +178,18 @@ public class SocialMediaCollectorService {
             log.error("Failed to save raw post for platform {} and keyword {}", platform, keyword, e);
         }
     }
-    
-    // Insert a single dummy post
+
+    // -----------------------------------
+    // Insert single dummy post
+    // -----------------------------------
     public DummyPost insertDummyPost(DummyPost post) {
         post.setCreatedAt(Instant.now());
         return dummyPostRepository.save(post);
     }
 
-    // Generate dummy posts with hazard type
+    // -----------------------------------
+    // Generate regional dummy posts
+    // -----------------------------------
     public void generateRegionalDummyPosts(String hazardType) {
         Random random = new Random();
         String[] platforms = {"twitter", "reddit", "facebook"};

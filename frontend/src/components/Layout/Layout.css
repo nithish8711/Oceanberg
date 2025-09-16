@@ -1,0 +1,37 @@
+.layout-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 100vh;
+}
+
+.glass-card {
+    background: rgba(0, 0, 0, 0.4); /* Darker, more visible background */
+    border-radius: 20px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5); /* Stronger border */
+    padding: 40px;
+    width: 400px;
+    text-align: center;
+    color: #fff;
+}
+
+.logo-section .logo {
+    width: 200px; /* Changed from 80px to 100px to make the logo slightly bigger */
+    height: auto;
+}
+
+.logo-section h1 {
+    font-size: 24px;
+    margin: 0;
+    font-weight: bold;
+}
+
+.logo-section p {
+    font-size: 14px;
+    margin-top: 5px;
+    color: #fff; /* Changed to pure white for visibility */
+}

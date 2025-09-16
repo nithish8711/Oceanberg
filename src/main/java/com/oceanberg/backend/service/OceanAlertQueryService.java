@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -17,7 +18,7 @@ public class OceanAlertQueryService {
     private final MongoTemplate mongoTemplate;
 
     /**
-     * Search high severity alerts for all hazard types:
+     * Search high severity alerts for all hazard types (case-insensitive):
      * - Tsunami: Red
      * - Storm Surge: Red or Orange
      * - High Wave: Red or Orange
@@ -27,20 +28,20 @@ public class OceanAlertQueryService {
     public List<OceanAlert> searchHighSeverityAlerts() {
         Query query = new Query();
 
-        Criteria tsunamiCriteria = Criteria.where("type").is("Tsunami")
-                                          .and("color").is("Red");
+        Criteria tsunamiCriteria = Criteria.where("type").regex("^tsunami$", "i")
+                                          .and("color").regex("^red$", "i");
 
-        Criteria stormSurgeCriteria = Criteria.where("type").is("Storm Surge")
-                                             .and("color").in("Red", "Orange");
+        Criteria stormSurgeCriteria = Criteria.where("type").regex("^storm surge$", "i")
+                                             .and("color").in("red", "orange");
 
-        Criteria highWaveCriteria = Criteria.where("type").is("High Wave")
-                                           .and("color").in("Red", "Orange");
+        Criteria highWaveCriteria = Criteria.where("type").regex("^high wave$", "i")
+                                           .and("color").in("red", "orange");
 
-        Criteria oceanCurrentCriteria = Criteria.where("type").is("Ocean Current")
-                                              .and("color").is("Red");
+        Criteria oceanCurrentCriteria = Criteria.where("type").regex("^ocean current$", "i")
+                                              .and("color").regex("^red$", "i");
 
-        Criteria swellSurgeCriteria = Criteria.where("type").is("Swell Surge")
-                                             .and("color").in("Red", "Orange");
+        Criteria swellSurgeCriteria = Criteria.where("type").regex("^swell surge$", "i")
+                                             .and("color").in("red", "orange");
 
         query.addCriteria(new Criteria().orOperator(
                 tsunamiCriteria,
@@ -53,7 +54,10 @@ public class OceanAlertQueryService {
         return mongoTemplate.find(query, OceanAlert.class);
     }
 
-        public List<OceanAlert> searchAlerts(
+    /**
+     * Search alerts with multiple optional filters (case-insensitive).
+     */
+    public List<OceanAlert> searchAlerts(
             String type,
             String districtOrState,
             LocalDateTime startDate,
@@ -61,32 +65,44 @@ public class OceanAlertQueryService {
             String color
     ) {
         Query query = new Query();
-        Criteria criteria = new Criteria();
+        List<Criteria> criteriaList = new ArrayList<>();
 
+        // Type filter
         if (type != null && !type.isEmpty()) {
-            criteria.and("type").is(type);
+            criteriaList.add(Criteria.where("type").regex("^" + type + "$", "i"));
         }
 
+        // Color filter
+        if (color != null && !color.isEmpty()) {
+            criteriaList.add(Criteria.where("color").regex("^" + color + "$", "i"));
+        }
+
+        // District or State filter
         if (districtOrState != null && !districtOrState.isEmpty()) {
-            criteria.orOperator(
+            criteriaList.add(new Criteria().orOperator(
                     Criteria.where("district").regex(districtOrState, "i"),
                     Criteria.where("state").regex(districtOrState, "i")
-            );
+            ));
         }
 
-        if (startDate != null) {
-            criteria.and("issueDate").gte(startDate);
-        }
-        if (endDate != null) {
-            criteria.and("issueDate").lte(endDate);
+        // Date filter
+        if (startDate != null || endDate != null) {
+            Criteria dateCriteria = new Criteria();
+            if (startDate != null && endDate != null) {
+                dateCriteria = Criteria.where("issueDate").gte(startDate).lte(endDate);
+            } else if (startDate != null) {
+                dateCriteria = Criteria.where("issueDate").gte(startDate);
+            } else if (endDate != null) {
+                dateCriteria = Criteria.where("issueDate").lte(endDate);
+            }
+            criteriaList.add(dateCriteria);
         }
 
-        if (color != null && !color.isEmpty()) {
-            criteria.and("color").is(color);
+        // Combine all criteria with AND
+        if (!criteriaList.isEmpty()) {
+            query.addCriteria(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])));
         }
 
-        query.addCriteria(criteria);
         return mongoTemplate.find(query, OceanAlert.class);
     }
-
 }
