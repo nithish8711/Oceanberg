@@ -30,25 +30,32 @@ public class AlertController {
         return repository.findByType(type);
     }
 
-    // ✅ Get alerts by location
-    @GetMapping("/location/{location}")
-    public List<OceanAlert> getByLocation(@PathVariable String location) {
-        return repository.findByLocation(location);
+    // Get alerts by district
+    @GetMapping("/district/{district}")
+    public List<OceanAlert> getByDistrict(@PathVariable String district) {
+        return repository.findByDistrict(district);
+    }
+
+    // Get alerts by state
+    @GetMapping("/state/{state}")
+    public List<OceanAlert> getByState(@PathVariable String state) {
+        return repository.findByState(state);
     }
 
     // ✅ Search with multiple query parameters
-    @GetMapping("/search")
+   @GetMapping("/search")
     public List<OceanAlert> search(
             @RequestParam(required = false) String type,
-            @RequestParam(required = false) String location,
+            @RequestParam(required = false) String districtOrState, // updated
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
-            @RequestParam(required = false) String severity
+            @RequestParam(required = false) String color // updated
     ) {
-        return queryService.searchAlerts(type, location, startDate, endDate, severity);
+        return queryService.searchAlerts(type, districtOrState, startDate, endDate, color);
     }
+
 
     // ✅ Get high severity alerts
     @GetMapping("/high-severity")

@@ -20,6 +20,8 @@ public class Report {
     private String type; // high_wave, tsunami etc.
     private String description;
     private Point location; // lon/lat
+    private String district; // New field
+    private String state;    // New field
     private Instant observedAt;
     private Instant submittedAt;
     private List<String> mediaFileIds; // GridFS file ids

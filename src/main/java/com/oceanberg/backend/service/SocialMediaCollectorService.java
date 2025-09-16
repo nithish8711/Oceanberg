@@ -37,123 +37,81 @@ public class SocialMediaCollectorService {
     private String instagramRapidApiKey;
 
     // Collect posts from a user report
+     public Set<String> getKeywordsFromReport(Report report) {
+        Set<String> keywords = new HashSet<>();
+        if (report.getType() != null) keywords.add(report.getType().toLowerCase());
+        if (report.getDescription() != null) keywords.add(report.getDescription().toLowerCase());
+        if (report.getDistrict() != null) keywords.add(report.getDistrict().toLowerCase());
+        if (report.getState() != null) keywords.add(report.getState().toLowerCase());
+        if (report.getSubmittedAt() != null) keywords.add(report.getSubmittedAt().toString());
+        return keywords;
+    }
+
+    public Set<String> getKeywordsFromAlert(OceanAlert alert) {
+        Set<String> keywords = new HashSet<>();
+        if (alert.getType() != null) keywords.add(alert.getType().toLowerCase());
+        if (alert.getDistrict() != null) keywords.add(alert.getDistrict().toLowerCase());
+        if (alert.getState() != null) keywords.add(alert.getState().toLowerCase());
+        if (alert.getColor() != null) keywords.add(alert.getColor().toLowerCase());
+        if (alert.getIssueDate() != null) keywords.add(alert.getIssueDate().toString());
+        return keywords;
+    }
+
+    // COLLECT POSTS
     public void collectFromReport(Report report) {
         if (!"USER".equalsIgnoreCase(report.getSource())) return;
 
-        String hazardType = report.getType(); // hazard type from report
-        Set<String> keywords = generateKeywordsFromReport(report);
+        String hazardType = report.getType();
+        Set<String> keywords = getKeywordsFromReport(report);
         Instant recentTimeWindow = Instant.now().minus(3, ChronoUnit.DAYS);
 
-        for (String keyword : keywords) {
-            collectForKeywordWithType(keyword, Optional.of(recentTimeWindow), hazardType);
-        }
+        keywords.forEach(keyword -> collectForKeywordWithType(keyword, Optional.of(recentTimeWindow), hazardType));
     }
 
-    // Collect posts from an INCOIS alert
     public void collectFromOceanAlert(OceanAlert alert) {
         if (!"INCOIS".equalsIgnoreCase(alert.getSource())) return;
 
-        String hazardType = alert.getType(); // hazard type from alert
-        Set<String> keywords = generateKeywordsFromAlert(alert);
+        String hazardType = alert.getType();
+        Set<String> keywords = getKeywordsFromAlert(alert);
         Instant recentTimeWindow = Instant.now().minus(3, ChronoUnit.DAYS);
 
-        for (String keyword : keywords) {
-            collectForKeywordWithType(keyword, Optional.of(recentTimeWindow), hazardType);
-        }
+        keywords.forEach(keyword -> collectForKeywordWithType(keyword, Optional.of(recentTimeWindow), hazardType));
     }
 
-    // Generate keywords from report
-    private Set<String> generateKeywordsFromReport(Report report) {
-        Set<String> keywords = new HashSet<>();
-        List<String> stopWords = Arrays.asList("a","an","the","in","is","of","on","and","or","for","at","to","from");
-
-        if (report.getType() != null && !report.getType().isEmpty()) {
-            keywords.add(report.getType().toLowerCase());
-        }
-
-        if (report.getDescription() != null && !report.getDescription().isEmpty()) {
-            Arrays.stream(report.getDescription().toLowerCase().split("\\s+"))
-                    .map(word -> word.replaceAll("[^a-zA-Z0-9]", ""))
-                    .filter(word -> !word.isEmpty() && !stopWords.contains(word))
-                    .forEach(keywords::add);
-        }
-
-        if (report.getType() != null && report.getLocation() != null) {
-            Point loc = report.getLocation();
-            String locStr = loc.getX() + "," + loc.getY();
-            keywords.add(report.getType().toLowerCase() + " " + locStr);
-        }
-
-        return keywords;
-    }
-
-    // Generate keywords from alert
-    private Set<String> generateKeywordsFromAlert(OceanAlert alert) {
-        Set<String> keywords = new HashSet<>();
-        List<String> stopWords = Arrays.asList("a","an","the","in","is","of","on","and","or","for","at","to","from","due","incois");
-
-        if (alert.getType() != null && !alert.getType().isEmpty()) {
-            keywords.add(alert.getType().toLowerCase());
-        }
-        if (alert.getLocation() != null && !alert.getLocation().isEmpty()) {
-            Arrays.stream(alert.getLocation().toLowerCase().split(",\\s*"))
-                    .forEach(keywords::add);
-        }
-        if (alert.getSeverity() != null && !alert.getSeverity().isEmpty()) {
-            keywords.add(alert.getSeverity().toLowerCase());
-        }
-        if (alert.getAdvisory() != null && !alert.getAdvisory().isEmpty()) {
-            Arrays.stream(alert.getAdvisory().toLowerCase().split("\\s+"))
-                    .map(word -> word.replaceAll("[^a-zA-Z0-9]", ""))
-                    .filter(word -> !word.isEmpty() && !stopWords.contains(word))
-                    .forEach(keywords::add);
-        }
-        if (alert.getType() != null && alert.getLocation() != null) {
-            keywords.add(alert.getType().toLowerCase() + " " + alert.getLocation().toLowerCase().replace(",", ""));
-        }
-
-        return keywords;
-    }
-
-    // Collect posts for a keyword with hazard type
     public void collectForKeywordWithType(String keyword, Optional<Instant> fromDate, String type) {
-        Map<String, Object> twitterData = twitterClient.fetchTweets(keyword, fromDate);
-        saveRawPostWithType("twitter", keyword, twitterData, type);
+        if (keyword == null || keyword.isEmpty()) return;
 
-        Map<String, Object> redditData = redditClient.searchPosts(keyword, fromDate);
-        saveRawPostWithType("reddit", keyword, redditData, type);
+        saveRawPostWithType("twitter", keyword, twitterClient.fetchTweets(keyword, fromDate), type);
+        saveRawPostWithType("reddit", keyword, redditClient.searchPosts(keyword, fromDate), type);
 
-        Map<String, Object> instagramData = rapidApiClient.callApi(
-            "instagram120.p.rapidapi.com",
-            "https://instagram120.p.rapidapi.com/api/instagram/hls?q=" + keyword,
-            instagramRapidApiKey);
-        saveRawPostWithType("instagram", keyword, instagramData, type);
+        saveRawPostWithType("instagram", keyword,
+                rapidApiClient.callApi("instagram120.p.rapidapi.com",
+                        "https://instagram120.p.rapidapi.com/api/instagram/hls?q=" + keyword,
+                        instagramRapidApiKey), type);
 
-        Map<String, Object> youtubeData = rapidApiClient.callApi(
-            "youtube138.p.rapidapi.com",
-            "https://youtube138.p.rapidapi.com/auto-complete/?q=" + keyword + "&hl=en&gl=US",
-            youtubeRapidApiKey);
-        saveRawPostWithType("youtube", keyword, youtubeData, type);
+        saveRawPostWithType("youtube", keyword,
+                rapidApiClient.callApi("youtube138.p.rapidapi.com",
+                        "https://youtube138.p.rapidapi.com/auto-complete/?q=" + keyword + "&hl=en&gl=US",
+                        youtubeRapidApiKey), type);
 
-        Map<String, Object> facebookData = rapidApiClient.callApi(
-            "facebook-pages-scraper2.p.rapidapi.com",
-            "https://facebook-pages-scraper2.p.rapidapi.com/fetch_search_people?query=" + keyword,
-            facebookRapidApiKey);
-        saveRawPostWithType("facebook", keyword, facebookData, type);
+        saveRawPostWithType("facebook", keyword,
+                rapidApiClient.callApi("facebook-pages-scraper2.p.rapidapi.com",
+                        "https://facebook-pages-scraper2.p.rapidapi.com/fetch_search_people?query=" + keyword,
+                        facebookRapidApiKey), type);
     }
 
-    // Save post with type
+    // SAVE POSTS
     private void saveRawPostWithType(String platform, String keyword, Map<String, Object> raw, String type) {
         if (raw == null || raw.isEmpty()) return;
 
         try {
-            Object contentObj = raw.containsKey("data") ? raw.get("data") : raw;
+            Object contentObj = raw.getOrDefault("data", raw);
             String content = contentObj != null ? contentObj.toString() : "{}";
 
             RawSocialPost post = RawSocialPost.builder()
                     .platform(platform)
                     .keyword(keyword)
-                    .type(type)  // assign hazard type
+                    .type(type)
                     .content(content)
                     .createdAt(Instant.now())
                     .build();
@@ -163,7 +121,7 @@ public class SocialMediaCollectorService {
             log.error("Failed to save raw post for platform {} and keyword {}", platform, keyword, e);
         }
     }
-
+    
     // Insert a single dummy post
     public DummyPost insertDummyPost(DummyPost post) {
         post.setCreatedAt(Instant.now());
@@ -196,27 +154,23 @@ public class SocialMediaCollectorService {
         List<DummyPost> dummyPosts = new ArrayList<>();
         int numPostsToGenerate = 50;
 
-        for (int i=0; i<numPostsToGenerate; i++) {
+        for (int i = 0; i < numPostsToGenerate; i++) {
             String platform = platforms[random.nextInt(platforms.length)];
             String subLocation = subLocations[random.nextInt(subLocations.length)];
             String categoryEn = categoriesEn[random.nextInt(categoriesEn.length)];
+            String categoryRegionalSelected = categoryRegional.getOrDefault(categoryEn, new String[]{categoryEn})[random.nextInt(3)];
 
-            String[] regionalVersions = categoryRegional.getOrDefault(categoryEn, new String[]{categoryEn});
-            String categoryRegionalSelected = regionalVersions[random.nextInt(regionalVersions.length)];
-
-            String template = contentTemplates[random.nextInt(contentTemplates.length)];
-            String content = template.replace("{subLocation}", subLocation)
+            String content = contentTemplates[random.nextInt(contentTemplates.length)]
+                    .replace("{subLocation}", subLocation)
                     .replace("{category}", categoryRegionalSelected);
 
-            DummyPost post = DummyPost.builder()
+            dummyPosts.add(DummyPost.builder()
                     .platform(platform)
                     .keyword(subLocation.toLowerCase())
                     .content(content)
-                    .type(hazardType)  // assign hazard type
+                    .type(hazardType)
                     .createdAt(Instant.now())
-                    .build();
-
-            dummyPosts.add(post);
+                    .build());
         }
 
         dummyPostRepository.saveAll(dummyPosts);

@@ -16,12 +16,49 @@ public class OceanAlertQueryService {
 
     private final MongoTemplate mongoTemplate;
 
-    public List<OceanAlert> searchAlerts(
+    /**
+     * Search high severity alerts for all hazard types:
+     * - Tsunami: Red
+     * - Storm Surge: Red or Orange
+     * - High Wave: Red or Orange
+     * - Ocean Current: Red
+     * - Swell Surge: Red or Orange
+     */
+    public List<OceanAlert> searchHighSeverityAlerts() {
+        Query query = new Query();
+
+        Criteria tsunamiCriteria = Criteria.where("type").is("Tsunami")
+                                          .and("color").is("Red");
+
+        Criteria stormSurgeCriteria = Criteria.where("type").is("Storm Surge")
+                                             .and("color").in("Red", "Orange");
+
+        Criteria highWaveCriteria = Criteria.where("type").is("High Wave")
+                                           .and("color").in("Red", "Orange");
+
+        Criteria oceanCurrentCriteria = Criteria.where("type").is("Ocean Current")
+                                              .and("color").is("Red");
+
+        Criteria swellSurgeCriteria = Criteria.where("type").is("Swell Surge")
+                                             .and("color").in("Red", "Orange");
+
+        query.addCriteria(new Criteria().orOperator(
+                tsunamiCriteria,
+                stormSurgeCriteria,
+                highWaveCriteria,
+                oceanCurrentCriteria,
+                swellSurgeCriteria
+        ));
+
+        return mongoTemplate.find(query, OceanAlert.class);
+    }
+
+        public List<OceanAlert> searchAlerts(
             String type,
-            String location,
+            String districtOrState,
             LocalDateTime startDate,
             LocalDateTime endDate,
-            String severity
+            String color
     ) {
         Query query = new Query();
         Criteria criteria = new Criteria();
@@ -29,32 +66,27 @@ public class OceanAlertQueryService {
         if (type != null && !type.isEmpty()) {
             criteria.and("type").is(type);
         }
-        if (location != null && !location.isEmpty()) {
-            criteria.and("location").regex(location, "i"); // case-insensitive
+
+        if (districtOrState != null && !districtOrState.isEmpty()) {
+            criteria.orOperator(
+                    Criteria.where("district").regex(districtOrState, "i"),
+                    Criteria.where("state").regex(districtOrState, "i")
+            );
         }
-        if (startDate != null && endDate != null) {
-            criteria.and("dateTime").gte(startDate).lte(endDate);
+
+        if (startDate != null) {
+            criteria.and("issueDate").gte(startDate);
         }
-        if (severity != null && !severity.isEmpty()) {
-            criteria.and("severity").is(severity);
+        if (endDate != null) {
+            criteria.and("issueDate").lte(endDate);
+        }
+
+        if (color != null && !color.isEmpty()) {
+            criteria.and("color").is(color);
         }
 
         query.addCriteria(criteria);
         return mongoTemplate.find(query, OceanAlert.class);
     }
-    
-    public List<OceanAlert> searchHighSeverityAlerts() {
-        Query query = new Query();
 
-        // Criteria for Tsunami alerts with high magnitude
-        Criteria tsunamiCriteria = Criteria.where("type").is("Tsunami").and("magnitude").gte(7.0);
-
-        // Criteria for Storm Surge alerts with high magnitude
-        Criteria stormSurgeCriteria = Criteria.where("type").is("Storm Surge").and("magnitude").gte(2.5);
-
-        // Combine the criteria using an OR operator
-        query.addCriteria(new Criteria().orOperator(tsunamiCriteria, stormSurgeCriteria));
-
-        return mongoTemplate.find(query, OceanAlert.class);
-    }
 }

@@ -2,9 +2,9 @@ package com.oceanberg.backend.scheduler;
 
 import com.oceanberg.backend.service.INCOISService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -13,13 +13,17 @@ public class INCOISScheduler {
 
     private final INCOISService service;
 
-    @Scheduled(fixedRate = 15 * 60 * 1000) // every 15 minutes
+    // Scheduled to run every 15 minutes
+    @Scheduled(fixedRate = 15 * 60 * 1000)
     public void fetchFeeds() {
         log.info("Starting scheduled INCOIS data fetch...");
-        
-        service.fetchTsunamiAlerts();
-        service.fetchTideStations();
-        service.fetchStormSurgeAlerts();
+
+        try {
+            service.fetchAllAlerts();  // fetch Cyclone, High Wave, Currents, Tsunami in bulk
+        } catch (Exception e) {
+            log.error("Error during INCOIS data fetch", e);
+        }
+
         log.info("Scheduled INCOIS data fetch completed.");
     }
 }

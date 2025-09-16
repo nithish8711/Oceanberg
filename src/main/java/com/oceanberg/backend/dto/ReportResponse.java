@@ -15,6 +15,8 @@ public class ReportResponse {
     private String description;
     private double lon;
     private double lat;
+    private String district; // New field
+    private String state;    // New field
     private Instant observedAt;
     private Instant submittedAt;
     private List<String> mediaFileIds;

@@ -32,4 +32,14 @@ public class UserController {
         userService.changePassword(username, newPassword);
         return ResponseEntity.ok("Password changed successfully");
     }
+
+    // Delete currently logged-in user account
+    @DeleteMapping("/delete-account")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<String> deleteAccount() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        userService.deleteAccount(username);
+        return ResponseEntity.ok("Account deleted successfully");
+    }
+
 }

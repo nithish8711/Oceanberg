@@ -27,12 +27,14 @@ public class AdminService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (request.getUsername() != null) user.setUsername(request.getUsername());
+        if (request.getEmail() != null) user.setEmail(request.getEmail());  // <-- Add this line
         if (request.getPassword() != null)
             user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         if (request.getEnabled() != null) user.setEnabled(request.getEnabled());
 
         return userRepository.save(user);
     }
+
 
     // Promote user to admin
     public User promoteToAdmin(String userId) {

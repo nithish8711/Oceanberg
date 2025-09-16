@@ -39,4 +39,10 @@ public class UserService {
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
+
+    // Delete account by username
+    public void deleteAccount(String username) {
+        User user = getByUsername(username); // fetch user or throw exception
+        userRepository.delete(user);
+    }
 }

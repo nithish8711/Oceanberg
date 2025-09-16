@@ -22,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.geo.Point;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
@@ -41,7 +42,7 @@ public class ReportService {
     private final GridFSBucket gridFsBucket;
     private final Random random = new Random();
 
-    // ✅ Submit new report
+    // Submit new report
     public ReportResponse submitReport(ReportRequest request, List<MultipartFile> files) throws IOException {
         List<String> fileIds = new ArrayList<>();
         if (files != null) {
@@ -58,20 +59,19 @@ public class ReportService {
                 .type(request.getType())
                 .description(request.getDescription())
                 .location(new Point(request.getLon(), request.getLat()))
+                .district(request.getDistrict()) // New field
+                .state(request.getState())      // New field
                 .observedAt(request.getObservedAt() != null ? request.getObservedAt() : Instant.now())
                 .submittedAt(Instant.now())
                 .mediaFileIds(fileIds)
                 .verified(false)
-                .source(request.getSource() != null ? request.getSource() : "USER") // 🔹 Use source from request, or default to "USER"
+                .source(request.getSource() != null ? request.getSource() : "USER")
                 .build();
 
         return toResponse(reportRepository.save(report));
     }
-    
-    // ✅ This method is no longer needed as the logic is handled in submitReport
-    // public void generateMockReport() { ... }
 
-    // ✅ Get reports of current user
+    // Get reports of current user
     public List<ReportResponse> getMyReports() {
         return reportRepository.findByUserId(getCurrentUserId())
                 .stream()
@@ -79,26 +79,21 @@ public class ReportService {
                 .collect(Collectors.toList());
     }
 
-    // ✅ Download media
+    // Download media
     public GridFsResource downloadMedia(String fileId) {
         GridFSFile file = gridFsTemplate.findOne(Query.query(Criteria.where("_id").is(new ObjectId(fileId))));
         if (file == null) return null;
         return gridFsTemplate.getResource(file);
     }
 
-    // ✅ Get raw GridFS file
-    public GridFSFile getFile(ObjectId fileId) {
-        return gridFsTemplate.findOne(Query.query(Criteria.where("_id").is(fileId)));
-    }
-
-    // ✅ Stream media by fileId
+    // Stream media by fileId
     public ResponseEntity<?> streamMedia(String fileId, String rangeHeader) throws IOException {
-        GridFSFile file = getFile(new ObjectId(fileId));
+        GridFSFile file = gridFsTemplate.findOne(Query.query(Criteria.where("_id").is(new ObjectId(fileId))));
         if (file == null) return ResponseEntity.notFound().build();
         return streamMedia(file, rangeHeader);
     }
 
-    // ✅ Stream media (internal)
+    // Stream media (internal)
     private ResponseEntity<?> streamMedia(GridFSFile file, String rangeHeader) throws IOException {
         long fileLength = file.getLength();
         String contentType = file.getMetadata() != null && file.getMetadata().get("_contentType") != null
@@ -147,7 +142,7 @@ public class ReportService {
                 .body(new InputStreamResource(inputStream));
     }
 
-    // ✅ Update report
+    // Update report
     public ReportResponse updateReport(String id, ReportRequest request, List<MultipartFile> newFiles) throws IOException {
         Report report = reportRepository.findById(id).orElseThrow(() -> new RuntimeException("Report not found"));
         if (!report.getUserId().equals(getCurrentUserId())) throw new AccessDeniedException("Not authorized");
@@ -165,20 +160,21 @@ public class ReportService {
         report.setType(request.getType());
         report.setDescription(request.getDescription());
         report.setLocation(new Point(request.getLon(), request.getLat()));
+        report.setDistrict(request.getDistrict()); // Update district
+        report.setState(request.getState());       // Update state
         report.setObservedAt(request.getObservedAt() != null ? request.getObservedAt() : report.getObservedAt());
         report.setMediaFileIds(fileIds);
-        report.setSource("USER"); // 🔹 Only a user can update their report, so source remains "USER"
+        report.setSource("USER");
 
         return toResponse(reportRepository.save(report));
     }
 
-    // ✅ Delete single report
+    // Delete single report
     public ReportResponse deleteReport(String id) {
         Optional<Report> reportOpt = reportRepository.findById(id);
         if (reportOpt.isEmpty()) return null;
 
         Report report = reportOpt.get();
-
         if (!report.getUserId().equals(getCurrentUserId())) {
             throw new SecurityException("You cannot delete this report");
         }
@@ -192,7 +188,7 @@ public class ReportService {
         return toResponse(report);
     }
 
-    // ✅ Delete all reports (optionally filtered by source)
+    // Delete all reports
     public void deleteAllReports(Optional<String> sourceFilter) {
         log.warn("Deleting reports. Filter: {}", sourceFilter.orElse("ALL"));
 
@@ -211,13 +207,13 @@ public class ReportService {
         }
     }
 
-    // ✅ Helper: get current user ID
+    // Helper: get current user ID
     private String getCurrentUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return auth.getName();
     }
 
-    // ✅ Helper: convert Report to ReportResponse
+    // Helper: convert Report to ReportResponse
     private ReportResponse toResponse(Report report) {
         return ReportResponse.builder()
                 .id(report.getId())
@@ -226,6 +222,8 @@ public class ReportService {
                 .description(report.getDescription())
                 .lon(report.getLocation().getX())
                 .lat(report.getLocation().getY())
+                .district(report.getDistrict())
+                .state(report.getState())
                 .observedAt(report.getObservedAt())
                 .submittedAt(report.getSubmittedAt())
                 .mediaFileIds(report.getMediaFileIds())

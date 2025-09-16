@@ -11,18 +11,24 @@ import java.util.Optional;
 @Repository
 public interface OceanAlertRepository extends MongoRepository<OceanAlert, String> {
 
-    List<OceanAlert> findByLocation(String location);
+    List<OceanAlert> findByDistrict(String district);
+
+    List<OceanAlert> findByState(String state);
 
     List<OceanAlert> findByType(String type);
 
-    // Use LocalDateTime range to avoid duplicates on the same day
-    Optional<OceanAlert> findByTypeAndLocationAndDateTimeBetween(
+    // Optional: search by type + district + state + date range + color
+    Optional<OceanAlert> findByTypeAndDistrictAndStateAndIssueDateBetweenAndColor(
             String type,
-            String location,
+            String district,
+            String state,
             LocalDateTime start,
-            LocalDateTime end
+            LocalDateTime end,
+            String color
     );
 
-    // New method to delete all documents
     void deleteAll();
+
+    void deleteByType(String type);
 }
+
