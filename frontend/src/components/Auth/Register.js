@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { FaUser, FaEnvelope, FaLock, FaCheckCircle } from 'react-icons/fa';
-import { registerUser } from '../../services/authService';
-import './Register.css';
+import { useAuth } from '../../context/AuthContext';
+import './AuthForms.css';
 
 const Register = () => {
+    const { register } = useAuth();
     const [userId, setUserId] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -11,24 +12,14 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        // Add password validation check
         if (password !== confirmPassword) {
             alert("Passwords do not match!");
-            return; // Stop the form submission
+            return;
         }
-
         try {
-            const signupData = {
-                userId,
-                email,
-                password,
-            };
-            const response = await registerUser(signupData);
-            
+            const signupData = { userId, email, password };
+            await register(signupData);
             alert("Registration successful! Please log in.");
-            console.log("Registration successful:", response);
-
         } catch (error) {
             alert(error.message);
         }
@@ -44,6 +35,7 @@ const Register = () => {
                         placeholder="Enter User ID"
                         value={userId}
                         onChange={(e) => setUserId(e.target.value)}
+                        autoComplete="username"
                     />
                 </div>
                 <div className="input-group">
@@ -53,6 +45,7 @@ const Register = () => {
                         placeholder="Enter your Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        autoComplete="email"
                     />
                 </div>
                 <div className="input-group">
@@ -62,6 +55,7 @@ const Register = () => {
                         placeholder="Create a Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        autoComplete="new-password"
                     />
                 </div>
                 <div className="input-group">
@@ -71,10 +65,11 @@ const Register = () => {
                         placeholder="Confirm Password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
+                        autoComplete="new-password"
                     />
                 </div>
             </div>
-            <button type="submit" className="register-button">Register!</button>
+            <button type="submit" className="register-button">🚀 Register!</button>
         </form>
     );
 };

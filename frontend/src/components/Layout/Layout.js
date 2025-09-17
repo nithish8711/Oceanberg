@@ -1,10 +1,10 @@
 import React from 'react';
 import './Layout.css';
-import logo from '../../assets/images/oceanberg-logo.png'; // logo
+import logo from '../../assets/images/oceanberg-logo.png';
 
 const Layout = ({ children }) => {
     return (
-        <div className="layout-container">
+        <div className="landing-page-background">
             <div className="glass-card">
                 <div className="logo-section">
                     <img src={logo} alt="Oceanberg Logo" className="logo" />

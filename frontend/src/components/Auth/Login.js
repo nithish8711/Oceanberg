@@ -1,25 +1,28 @@
 import React, { useState } from 'react';
 import { FaUser, FaLock } from 'react-icons/fa';
-import { loginUser } from '../../services/authService';
-import './Login.css';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import './AuthForms.css';
 
 const Login = () => {
-    const [credential, setCredential] = useState(''); // Use a general credential state
+    const navigate = useNavigate();
+    const { login } = useAuth();
+    const [credential, setCredential] = useState('');
     const [password, setPassword] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(credential);
+            const loginData = { username: credential, password };
+            const response = await login(loginData);
 
-            const loginData = isEmail
-                ? { email: credential, password: password }
-                : { username: credential, password: password };
-
-            await loginUser(loginData);
-            alert("Logged in successfully!");
+            if (response.roles.includes("ROLE_ADMIN")) {
+                navigate('/admin-dashboard');
+            } else {
+                navigate('/user-dashboard');
+            }
         } catch (error) {
-            alert(error.message);
+            alert(`Login failed: ${error.message}`);
         }
     };
 
@@ -30,7 +33,7 @@ const Login = () => {
                     <FaUser className="icon" />
                     <input
                         type="text"
-                        placeholder="Enter your User ID or Email" // Updated placeholder
+                        placeholder="Enter your User ID or Email"
                         value={credential}
                         onChange={(e) => setCredential(e.target.value)}
                     />

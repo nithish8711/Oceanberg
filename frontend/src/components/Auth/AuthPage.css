@@ -1,0 +1,90 @@
+.auth-page-background {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-image: url('../../assets/images/iceberg-background.jpeg');
+    background-size: cover;
+    background-position: center;
+}
+
+.auth-card {
+    width: 450px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 40px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.logo-container img {
+    width: 80px;
+    height: auto;
+}
+
+.logo-text {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.logo-subtitle {
+    font-size: 0.9rem;
+    text-align: center;
+    color: #fff;
+}
+
+.toggle-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 10px 0;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border-radius: 8px 8px 0 0;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.tab-button:not(:last-child) {
+    margin-right: 10px;
+}
+
+.tab-button:hover {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+.active-tab {
+    background: rgba(255, 255, 255, 0.9);
+    color: #0077cc;
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+    .auth-card {
+        width: 90%;
+        padding: 20px;
+    }
+}
