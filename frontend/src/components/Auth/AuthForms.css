@@ -16,7 +16,7 @@
 
 .input-group input {
     width: 100%;
-    padding: 10px 10px 10px 35px;
+    padding: 10px 10px 10px 40px;
     background: rgba(255, 255, 255, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 5px;
@@ -27,7 +27,7 @@
 
 .input-group .icon {
     position: absolute;
-    left: 10px;
+    left: 15px;
     top: 50%;
     transform: translateY(-50%);
     color: rgba(255, 255, 255, 0.9);
@@ -37,7 +37,20 @@
     color: rgba(255, 255, 255, 0.8);
 }
 
-.access-button, .register-button {
+.options {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.options a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.access-button {
     width: 100%;
     padding: 15px;
     border: none;
@@ -54,12 +67,26 @@
     background-color: #0056b3;
 }
 
-.register-button:hover {
-    background-color: #0056b3;
-}
-
 .system-status {
     font-size: 12px;
     margin-top: 20px;
     color: #fff;
+}
+
+/* Specific styles for the register button */
+.register-button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.register-button:hover {
+    background-color: #218838;
 }

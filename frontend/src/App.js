@@ -9,6 +9,7 @@ import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import AdminDashboardPage from './Pages/AdminDashboardPage'; // Social Media Map
 import UserDashboardPage from './Pages/UserDashboardPage';
+import EarlyWarningPage from './Pages/EarlyWarningPage'; // ✅ Import Early Warning Page
 
 // Protected route for dashboards
 const PrivateRoute = ({ children, role }) => {
@@ -37,6 +38,12 @@ function App() {
                     <Route 
                         path="/admin-dashboard" 
                         element={<PrivateRoute role="admin"><AdminDashboardPage /></PrivateRoute>} 
+                    />
+
+                    {/* Early Warning System Page (only for admins) */}
+                    <Route 
+                        path="/early-warning" 
+                        element={<PrivateRoute role="admin"><EarlyWarningPage /></PrivateRoute>} 
                     />
 
                     {/* User Dashboard */}

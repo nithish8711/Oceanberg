@@ -57,9 +57,9 @@ public class AlertController {
     }
 
 
-    // ✅ Get high severity alerts
+    /* ✅ Get high severity alerts
     @GetMapping("/high-severity")
     public List<OceanAlert> getHighSeverityAlerts() {
         return queryService.searchHighSeverityAlerts();
-    }
+    } */
 }

@@ -31,4 +31,3 @@ public interface OceanAlertRepository extends MongoRepository<OceanAlert, String
 
     void deleteByType(String type);
 }
-

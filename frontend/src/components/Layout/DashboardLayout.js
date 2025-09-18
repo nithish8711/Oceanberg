@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { FaTachometerAlt, FaSearch, FaFileAlt, FaSignOutAlt } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
-import logo from '../../assets/images/oceanberg-logo.png'; // ✅ Import logo
+import logo from '../../assets/images/oceanberg-logo.png'; // ✅ Imported logo
 import './DashboardLayout.css';
 
 const DashboardLayout = ({ children }) => {
@@ -13,7 +13,7 @@ const DashboardLayout = ({ children }) => {
             {/* Sidebar */}
             <div className="sidebar">
                 <div className="sidebar-header">
-                    <img src={logo} alt="Oceanberg Logo" className="logo" /> {/* Use imported logo */}
+                    <img src={logo} alt="Oceanberg Logo" className="logo" />
                     <h2>OCEANBERG</h2>
                     <p>Maritime Emergency Response Portal</p>
                 </div>
@@ -22,7 +22,7 @@ const DashboardLayout = ({ children }) => {
                     <NavLink to="/admin-dashboard" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
                         <FaTachometerAlt /> Social Media
                     </NavLink>
-                    <NavLink to="/social-media" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                   <NavLink to="/early-warning" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
                         <FaSearch /> Early Warning System
                     </NavLink>
                     <NavLink to="/reports" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>

@@ -42,22 +42,14 @@
     margin-top: 10px;
 }
 
-.logo-subtitle {
-    font-size: 0.9rem;
-    text-align: center;
-    color: #fff;
-}
-
 .toggle-container {
     display: flex;
     justify-content: center;
     margin-bottom: 20px;
-    width: 100%;
 }
 
 .tab-button {
-    flex: 1;
-    padding: 10px 0;
+    padding: 10px 25px;
     border: none;
     cursor: pointer;
     font-size: 1rem;
@@ -77,14 +69,6 @@
 }
 
 .active-tab {
-    background: rgba(255, 255, 255, 0.9);
+    background: #fff;
     color: #0077cc;
-}
-
-/* Responsive */
-@media (max-width: 500px) {
-    .auth-card {
-        width: 90%;
-        padding: 20px;
-    }
 }
