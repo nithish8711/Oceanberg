@@ -55,10 +55,14 @@ mvn spring-boot:run /
 Default URL: http://localhost:8080
 
 Test API Endpoints:
+
 Use Postman or HTTP clients to test endpoints like:
-POST /reports – Submit hazard reports
-GET /reports – Retrieve hazard data
-GET /alerts – Fetch real-time alerts
+
+> POST /reports – Submit hazard reports
+
+> GET /reports – Retrieve hazard data
+
+> GET /alerts – Fetch real-time alerts
 
 Screenshots
 
