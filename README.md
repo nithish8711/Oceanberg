@@ -1,11 +1,17 @@
 Oceanberg – Ocean Hazard & Crowdsourcing App
+
 Oceanberg is a user-friendly platform designed to monitor, report, and analyze ocean hazards in real-time. It leverages crowdsourced data and predictive analytics to enhance maritime safety and environmental awareness. The app empowers users—fishermen, sailors, and environmental enthusiasts—to contribute observations while providing actionable insights to authorities and communities.
 
 Key Features
+
 > Crowdsourced Hazard Reporting: Users can report hazards such as storms, high waves, or pollution events.
+
 > Real-time Alerts: Notifications about imminent hazards based on user reports and predictive models.
+
 > Interactive Maps & Charts: Visualize hazard trends and locations in real-time.
+
 > Community Collaboration: Validate reports and engage with other users.
+
 > Predictive Analytics: AI-powered forecasting for proactive hazard management.
 
 Technology Stack
@@ -28,8 +34,11 @@ Ensure Java 17+ and Maven are installed. Maven will manage dependencies.
 Add database URL, credentials, and API keys in src/main/resources/application.properties:
 
 spring.datasource.url=jdbc:mysql://localhost:3306/oceanberg
+
 spring.datasource.username=root
+
 spring.datasource.password=yourpassword
+
 spring.jpa.hibernate.ddl-auto=update
 
 > Build the application:
