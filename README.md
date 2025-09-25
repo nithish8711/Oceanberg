@@ -48,6 +48,7 @@ GET /reports – Retrieve hazard data
 GET /alerts – Fetch real-time alerts
 
 Screenshots
+
 <img width="1907" height="896" alt="image" src="https://github.com/user-attachments/assets/557fa395-9592-4ac8-8928-3acbfa6967f5" />
 Real-time hazard reporting and mapping dashboard
 
@@ -56,10 +57,9 @@ Early Warning System with location and details
 
 Contributing
 We welcome contributions from developers and ocean enthusiasts
+
 Fork the repository
-Create a feature branch (git checkout -b feature-name)
-Commit your changes (git commit -m "Add feature")
-
-Push the branch (git push origin feature-name)
-
-Open a Pull Request
+> Create a feature branch (git checkout -b feature-name)
+> Commit your changes (git commit -m "Add feature")
+> Push the branch (git push origin feature-name)
+> Open a Pull Request
