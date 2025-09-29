@@ -1,0 +1,72 @@
+[
+  {
+    "id": "RPT-001",
+    "userId": "USR-100",
+    "type": "Cyclone",
+    "description": "Severe cyclone winds causing roof damage and tree falls in Egmore area. Multiple buildings affected.",
+    "location": { "lat": 13.0827, "lng": 80.2707 },
+    "district": "Chennai",
+    "state": "Tamil Nadu",
+    "observedAt": "2025-09-26T06:30:00Z",
+    "submittedAt": "2025-09-26T06:45:00Z",
+    "mediaFileIds": [],
+    "verified": true,
+    "source": "USER"
+  },
+  {
+    "id": "RPT-002",
+    "userId": "USR-101",
+    "type": "Cyclone",
+    "description": "Strong cyclone winds disrupting traffic on Anna Salai. Signal posts damaged, vehicles stranded.",
+    "location": { "lat": 13.0732, "lng": 80.2609 },
+    "district": "Chennai",
+    "state": "Tamil Nadu",
+    "observedAt": "2025-09-26T05:50:00Z",
+    "submittedAt": "2025-09-26T06:05:00Z",
+    "mediaFileIds": [],
+    "verified": false,
+    "source": "USER"
+  },
+  {
+    "id": "RPT-003",
+    "userId": "USR-102",
+    "type": "Cyclone",
+    "description": "Cyclone causing waterlogging in T. Nagar commercial area. Shops closed, pedestrian movement restricted.",
+    "location": { "lat": 13.0878, "lng": 80.2785 },
+    "district": "Chennai",
+    "state": "Tamil Nadu",
+    "observedAt": "2025-09-24T10:15:00Z",
+    "submittedAt": "2025-09-24T10:45:00Z",
+    "mediaFileIds": [],
+    "verified": true,
+    "source": "USER"
+  },
+  {
+    "id": "RPT-004",
+    "userId": "USR-103",
+    "type": "Cyclone",
+    "description": "Cyclone impact in Mylapore with power outages and communication disruption. Residents seeking shelter.",
+    "location": { "lat": 13.0878, "lng": 80.2785 },
+    "district": "Chennai",
+    "state": "Tamil Nadu",
+    "observedAt": "2025-09-25T14:20:00Z",
+    "submittedAt": "2025-09-25T14:35:00Z",
+    "mediaFileIds": [],
+    "verified": false,
+    "source": "USER"
+  },
+  {
+    "id": "RPT-005",
+    "userId": "USR-104",
+    "type": "Cyclone",
+    "description": "Severe cyclone damage in Triplicane area. Building structures compromised, emergency evacuation needed.",
+    "location": { "lat": 13.0569, "lng": 80.257 },
+    "district": "Chennai",
+    "state": "Tamil Nadu",
+    "observedAt": "2025-09-26T08:10:00Z",
+    "submittedAt": "2025-09-26T08:25:00Z",
+    "mediaFileIds": [],
+    "verified": true,
+    "source": "USER"
+  }
+]

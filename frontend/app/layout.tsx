@@ -10,6 +10,7 @@ import SessionProviderWrapper from "./providers/SessionProviderWrapper"
 
 export const metadata: Metadata = {
   title: "Oceanberg",
+    generator: 'v0.app'
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

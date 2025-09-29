@@ -8,19 +8,19 @@ type NavLink = {
   label: string
 }
 
-const adminLinks: NavLink[] = [
-  { href: "/admin/early-warning", label: "Early Warning" },
-  { href: "/admin/reports", label: "Reports" },
-  { href: "/admin/guidepath", label: "Guidepath" },
-  { href: "/admin/inbox", label: "Admin Inbox" },
+const analyticsLinks: NavLink[] = [
+  { href: "/analytics/early-warning", label: "Early Warning" },
+  { href: "/analytics/hotspots", label: "Hotspots" },
+  { href: "/analytics/impact", label: "Impact" },
+  { href: "/analytics/admin-messages", label: "Admin Messages" },
 ]
 
-export default function AdminNav() {
+export default function AnalyticsNav() {
   const pathname = usePathname()
 
   return (
-    <nav aria-label="Admin" className="flex items-center gap-1 overflow-x-auto">
-      {adminLinks.map((link) => {
+    <nav aria-label="Analytics" className="flex items-center gap-1 overflow-x-auto">
+      {analyticsLinks.map((link) => {
         const isActive = pathname === link.href
         return (
           <Link

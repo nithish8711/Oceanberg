@@ -1,0 +1,68 @@
+{
+  "highestRisk": { "region": "Egmore, Chennai", "severity": 9.2, "impact": "Cyclone damage and emergency evacuation" },
+  "reportCountsByArea": [
+    { "area": "Egmore", "count": 28 },
+    { "area": "T. Nagar", "count": 24 },
+    { "area": "Mylapore", "count": 19 },
+    { "area": "Triplicane", "count": 16 },
+    { "area": "Anna Salai", "count": 14 },
+    { "area": "Royapettah", "count": 12 },
+    { "area": "Kilpauk", "count": 10 },
+    { "area": "Choolai", "count": 8 },
+    { "area": "Purasawalkam", "count": 6 },
+    { "area": "Nungambakkam", "count": 5 }
+  ],
+  "needsBreakdown": [
+    { "need": "Emergency Evacuation", "count": 45, "color": "#ef4444" },
+    { "need": "Medical Help", "count": 38, "color": "#f59e0b" },
+    { "need": "Food", "count": 32, "color": "#10b981" },
+    { "need": "Shelter", "count": 29, "color": "#2563eb" },
+    { "need": "Water", "count": 26, "color": "#8b5cf6" },
+    { "need": "Power / Electricity", "count": 24, "color": "#06b6d4" },
+    { "need": "Communication", "count": 18, "color": "#84cc16" },
+    { "need": "Transportation", "count": 15, "color": "#f97316" },
+    { "need": "Clean-up & Disinfection", "count": 12, "color": "#ec4899" },
+    { "need": "Financial Assistance", "count": 8, "color": "#6366f1" }
+  ],
+  "trendPerHour": [
+    { "hour": "06:00", "reports": 12, "social": 18 },
+    { "hour": "07:00", "reports": 15, "social": 22 },
+    { "hour": "08:00", "reports": 18, "social": 28 },
+    { "hour": "09:00", "reports": 22, "social": 35 },
+    { "hour": "10:00", "reports": 16, "social": 24 },
+    { "hour": "11:00", "reports": 19, "social": 31 },
+    { "hour": "12:00", "reports": 25, "social": 42 }
+  ],
+  "severityByRegion": [
+    { "region": "Chennai Central", "severity": 9.2 },
+    { "region": "Chennai North", "severity": 8.1 },
+    { "region": "Chennai South", "severity": 7.4 },
+    { "region": "Chennai West", "severity": 6.8 }
+  ],
+  "verificationSplit": [
+    { "source": "Social Media", "verified": 234, "unverified": 89, "total": 323 },
+    { "source": "Citizen Reports", "verified": 67, "unverified": 28, "total": 95 }
+  ],
+  "topKeywords": [
+    { "keyword": "evacuation", "count": 45 },
+    { "keyword": "cyclone", "count": 42 },
+    { "keyword": "flooding", "count": 38 },
+    { "keyword": "emergency", "count": 35 },
+    { "keyword": "shelter", "count": 29 },
+    { "keyword": "medical", "count": 26 },
+    { "keyword": "power", "count": 24 },
+    { "keyword": "transport", "count": 18 }
+  ],
+  "summary": {
+    "highImpactAreas": ["Egmore", "T. Nagar", "Mylapore"],
+    "currentHighestNeed": "Emergency Evacuation",
+    "totalReports": 142,
+    "totalSocialPosts": 623
+  },
+  "criticalList": [
+    { "area": "Egmore", "severity": 9.2 },
+    { "area": "T. Nagar", "severity": 8.7 },
+    { "area": "Mylapore", "severity": 8.1 },
+    { "area": "Triplicane", "severity": 7.8 }
+  ]
+}

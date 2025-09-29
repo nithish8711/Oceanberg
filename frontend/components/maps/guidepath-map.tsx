@@ -1,7 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
-import "leaflet/dist/leaflet.css"
+import { useEffect, useMemo } from "react"
 
 type Props = {
   origin: { lat: number; lng: number } | null
@@ -9,7 +8,6 @@ type Props = {
   label?: string
 }
 
-const BOUNDS = { minLon: 68, maxLon: 97, minLat: 6, maxLat: 37 }
 const WIDTH = 800
 const HEIGHT = 520
 
@@ -17,19 +15,34 @@ function mercY(lat: number) {
   const rad = (lat * Math.PI) / 180
   return Math.log(Math.tan(Math.PI / 4 + rad / 2))
 }
-function project([lat, lon]: [number, number]) {
-  const x = ((lon - BOUNDS.minLon) / (BOUNDS.maxLon - BOUNDS.minLon)) * WIDTH
-  const my = mercY(lat)
-  const myMin = mercY(BOUNDS.minLat)
-  const myMax = mercY(BOUNDS.maxLat)
-  const yNorm = (my - myMin) / (myMax - myMin)
-  const y = (1 - yNorm) * HEIGHT
-  return { x, y }
-}
 
-export function RouteMap({ origin, dest }: Props) {
-  const fallback = { lat: 12.9716, lng: 77.5946 }
+export function GuidePathMap({ origin, dest }: Props) {
+  const fallback = { lat: 13.0827, lng: 80.2707 } // Chennai center
   const c = origin ?? dest ?? fallback
+
+  // Dynamically compute bounding box from available points
+  const BOUNDS = useMemo(() => {
+    const lats = [origin?.lat, dest?.lat, fallback.lat].filter(Boolean) as number[]
+    const lngs = [origin?.lng, dest?.lng, fallback.lng].filter(Boolean) as number[]
+    const padding = 0.01 // ~1km padding
+
+    return {
+      minLat: Math.min(...lats) - padding,
+      maxLat: Math.max(...lats) + padding,
+      minLon: Math.min(...lngs) - padding,
+      maxLon: Math.max(...lngs) + padding,
+    }
+  }, [origin, dest])
+
+  function project([lat, lon]: [number, number]) {
+    const x = ((lon - BOUNDS.minLon) / (BOUNDS.maxLon - BOUNDS.minLon)) * WIDTH
+    const my = mercY(lat)
+    const myMin = mercY(BOUNDS.minLat)
+    const myMax = mercY(BOUNDS.maxLat)
+    const yNorm = (my - myMin) / (myMax - myMin)
+    const y = (1 - yNorm) * HEIGHT
+    return { x, y }
+  }
 
   const oP = origin ? project([origin.lat, origin.lng]) : null
   const dP = dest ? project([dest.lat, dest.lng]) : null

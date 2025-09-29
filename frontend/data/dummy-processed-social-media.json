@@ -1,0 +1,52 @@
+[
+  {
+    "type": "Cyclone",
+    "location": { "lat": 13.0827, "lng": 80.2707 },
+    "intensity": 0.89,
+    "updatedAt": "2025-09-26T07:13:00Z",
+    "reportCount": 156,
+    "affectedAreas": ["Egmore", "Nungambakkam"],
+    "source": "TWITTER",
+    "description": "Severe cyclone winds causing widespread damage in central Chennai areas. Trees uprooted, power lines down."
+  },
+  {
+    "type": "Cyclone",
+    "location": { "lat": 13.0878, "lng": 80.2785 },
+    "intensity": 0.76,
+    "updatedAt": "2025-09-25T14:41:00Z",
+    "reportCount": 134,
+    "affectedAreas": ["T. Nagar", "Mylapore"],
+    "source": "FACEBOOK",
+    "description": "Strong cyclone winds disrupting transportation. Multiple reports of flooding in commercial areas."
+  },
+  {
+    "type": "Cyclone",
+    "location": { "lat": 13.0569, "lng": 80.257 },
+    "intensity": 0.82,
+    "updatedAt": "2025-09-24T18:02:00Z",
+    "reportCount": 98,
+    "affectedAreas": ["Triplicane", "Royapettah"],
+    "source": "INSTAGRAM",
+    "description": "Cyclone causing severe waterlogging and structural damage. Emergency services overwhelmed."
+  },
+  {
+    "type": "Cyclone",
+    "location": { "lat": 13.0732, "lng": 80.2609 },
+    "intensity": 0.71,
+    "updatedAt": "2025-09-26T09:15:00Z",
+    "reportCount": 87,
+    "affectedAreas": ["Anna Salai", "Kilpauk"],
+    "source": "TWITTER",
+    "description": "Cyclone winds affecting major transport corridors. Traffic signals down, road blockages reported."
+  },
+  {
+    "type": "Cyclone",
+    "location": { "lat": 13.0569, "lng": 80.2848 },
+    "intensity": 0.65,
+    "updatedAt": "2025-09-25T16:30:00Z",
+    "reportCount": 73,
+    "affectedAreas": ["Choolai", "Purasawalkam"],
+    "source": "FACEBOOK",
+    "description": "Moderate cyclone impact with localized flooding and power outages in residential areas."
+  }
+]

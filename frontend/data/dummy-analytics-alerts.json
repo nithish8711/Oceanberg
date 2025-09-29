@@ -1,0 +1,46 @@
+[
+  {
+    "type": "High Wave",
+    "district": "Kozhikode",
+    "state": "Kerala",
+    "color": "Orange",
+    "message": "High wave warning for coastal areas; fishermen advised not to venture.",
+    "source": "INCOIS",
+    "issueDate": "2025-09-25T08:00:00Z",
+    "latitude": 11.2588,
+    "longitude": 75.7804
+  },
+  {
+    "type": "Cyclone",
+    "district": "Kannur",
+    "state": "Kerala",
+    "color": "Red",
+    "message": "Cyclone landfall expected; severe wind and rain predicted.",
+    "source": "IMD",
+    "issueDate": "2025-09-26T06:00:00Z",
+    "latitude": 11.8745,
+    "longitude": 75.3704
+  },
+  {
+    "type": "Flood",
+    "district": "Ernakulam",
+    "state": "Kerala",
+    "color": "Yellow",
+    "message": "Localized flooding in low-lying areas.",
+    "source": "IMD",
+    "issueDate": "2025-09-24T05:00:00Z",
+    "latitude": 9.9816,
+    "longitude": 76.2999
+  },
+  {
+    "type": "Tsunami",
+    "district": "Chennai",
+    "state": "Tamil Nadu",
+    "color": "Green",
+    "message": "No significant tsunami threat; advisory in effect.",
+    "source": "INCOIS",
+    "issueDate": "2025-09-23T04:00:00Z",
+    "latitude": 13.0827,
+    "longitude": 80.2707
+  }
+]

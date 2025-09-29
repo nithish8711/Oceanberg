@@ -1,4 +1,4 @@
-  // LeafletMap.tsx
+// LeafletMap.tsx
 
   "use client"
 
