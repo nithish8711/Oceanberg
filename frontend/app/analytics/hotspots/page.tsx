@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { useMemo, useState } from "react"
-// charts
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from "recharts"
 
 type Social = {
@@ -64,7 +63,6 @@ const NEEDS_OPTIONS = [
   "Transportation",
 ]
 
-// Generate random needs for each area
 const generateAreaNeeds = (area: string) => {
   const shuffled = [...NEEDS_OPTIONS].sort(() => 0.5 - Math.random())
   const selectedNeeds = shuffled.slice(0, Math.floor(Math.random() * 5) + 3)
@@ -79,7 +77,6 @@ export default function Page() {
   const [area, setArea] = useState("all")
   const [type, setType] = useState("all")
   const [timeframe, setTimeframe] = useState("7d")
-
   const [showReports, setShowReports] = useState(true)
   const [showSocial, setShowSocial] = useState(true)
 
@@ -257,7 +254,7 @@ export default function Page() {
   }, [areaImpactData, filteredReports, filteredSocial])
 
   return (
-    <main className="space-y-6">
+    <main className="space-y-6 px-2 md:px-4 lg:px-6 py-4 md:py-6 lg:py-8 max-w-7xl mx-auto">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-balance">Hotspots</h1>
         <div className="flex items-center gap-2">

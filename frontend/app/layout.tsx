@@ -1,16 +1,17 @@
+import type React from "react"
 import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
-import Link from "next/link"
 import { Suspense } from "react"
 import ClientNav from "../components/client-nav"
 import SessionProviderWrapper from "./providers/SessionProviderWrapper"
+import { PageTransition } from "@/components/page-transition"
 
 export const metadata: Metadata = {
   title: "Oceanberg",
-    generator: 'v0.app'
+  generator: "v0.app",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -26,19 +27,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <SessionProviderWrapper>
           <Suspense fallback={<div>Loading...</div>}>
-            <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-              <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-                <Link href="/" className="font-semibold text-foreground">
-                  Oceanberg
-                  <span className="sr-only">{" - Home"}</span>
-                </Link>
+            <ClientNav />
 
-                <ClientNav />
-              </div>
-            </header>
-
-            <main id="main" className="mx-auto max-w-6xl px-4 py-6">
-              {children}
+            <main id="main" className="min-h-screen">
+              <PageTransition>{children}</PageTransition>
             </main>
           </Suspense>
 

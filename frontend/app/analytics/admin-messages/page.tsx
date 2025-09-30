@@ -123,7 +123,7 @@ export default function Page() {
   const unreadCount = messages.filter((msg) => msg.from === "ADMIN" && msg.status === "UNREAD").length
 
   return (
-    <main className="space-y-6">
+    <main className="space-y-6 px-2 md:px-4 lg:px-6 py-4 md:py-6 lg:py-8 max-w-7xl mx-auto">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-semibold text-balance">Admin Communication</h1>

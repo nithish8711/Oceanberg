@@ -194,8 +194,8 @@ export default function EarlyWarningPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl p-4 md:p-6">
-      <header className="mb-4 flex items-center justify-between">
+    <main className="w-full px-4 py-6 md:px-6 lg:px-8 xl:px-12">
+      <header className="mb-6 flex items-center justify-between">
         <h1 className="text-balance text-2xl font-semibold tracking-tight md:text-3xl">Early Warnings</h1>
         {isAnalyticsPage && (
           <div className="flex items-center gap-2">
@@ -209,8 +209,8 @@ export default function EarlyWarningPage() {
         )}
       </header>
 
-      <section className="grid gap-4 md:grid-cols-4">
-        <Card className="md:col-span-3">
+      <section className="grid gap-6 lg:grid-cols-4">
+        <Card className="lg:col-span-3 hover:shadow-lg transition-shadow duration-300">
           <CardHeader>
             <CardTitle className="text-lg">Live Map</CardTitle>
           </CardHeader>
@@ -254,13 +254,13 @@ export default function EarlyWarningPage() {
                 </Popover>
               </div>
             </div>
-            <div className="relative z-0 h-[420px]">
+            <div className="relative z-0 h-[420px] lg:h-[500px]">
               <LeafletMap markers={markers} />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-lg transition-shadow duration-300">
           <CardHeader>
             <CardTitle className="text-lg">Summary</CardTitle>
           </CardHeader>
@@ -301,7 +301,7 @@ export default function EarlyWarningPage() {
         </Card>
       </section>
 
-      <Separator className="my-6" />
+      <Separator className="my-8" />
 
       <section className="space-y-4">
         <div className="space-y-3">

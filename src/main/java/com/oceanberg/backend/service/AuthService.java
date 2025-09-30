@@ -2,7 +2,7 @@ package com.oceanberg.backend.service;
 
 import com.oceanberg.backend.dto.LoginRequest;
 import com.oceanberg.backend.dto.SignupRequest;
-import com.oceanberg.backend.dto.JwtResponse;
+import com.oceanberg.backend.dto.LoginResponse;
 import com.oceanberg.backend.model.Role;
 import com.oceanberg.backend.model.User;
 import com.oceanberg.backend.repository.UserRepository;
@@ -28,32 +28,35 @@ public class AuthService {
 
     public User register(SignupRequest request) {
         User user = User.builder()
-                .username(request.getUsername())
+                .name(request.getName())
+                .userId(request.getUserId())
                 .email(request.getEmail())
+                .state(request.getState())
+                .district(request.getDistrict())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .roles(Collections.singleton(Role.ROLE_USER))
+                .roles(Collections.singleton(Role.ROLE_USER)) // default role
                 .enabled(true)
                 .createdAt(Instant.now())
                 .build();
         return userRepository.save(user);
     }
 
-    public JwtResponse login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getUsername(), request.getPassword()
+                        request.getUserId(), request.getPassword()
                 )
         );
 
-        User user = userRepository.findByUsername(request.getUsername())
+        User user = userRepository.findByUserId(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         String token = jwtUtil.generateToken(authentication);
 
-        return new JwtResponse(
+        return new LoginResponse(
                 token,
-                "Bearer",
-                user.getUsername(),
+                user.getUserId(),
+                user.getEmail(),
                 user.getRoles().stream().map(Enum::name).collect(Collectors.toSet())
         );
     }

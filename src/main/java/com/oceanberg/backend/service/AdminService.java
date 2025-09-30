@@ -21,13 +21,16 @@ public class AdminService {
         return userRepository.findAll();
     }
 
-    // Update user details
+    // Update user details using userId (not MongoDB _id)
     public User updateUser(String userId, UserUpdateRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with userId: " + userId));
 
-        if (request.getUsername() != null) user.setUsername(request.getUsername());
-        if (request.getEmail() != null) user.setEmail(request.getEmail());  // <-- Add this line
+        if (request.getName() != null) user.setName(request.getName());
+        if (request.getUserId() != null) user.setUserId(request.getUserId()); // allow changing loginId
+        if (request.getEmail() != null) user.setEmail(request.getEmail());
+        if (request.getState() != null) user.setState(request.getState());
+        if (request.getDistrict() != null) user.setDistrict(request.getDistrict());
         if (request.getPassword() != null)
             user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         if (request.getEnabled() != null) user.setEnabled(request.getEnabled());
@@ -35,17 +38,26 @@ public class AdminService {
         return userRepository.save(user);
     }
 
-
     // Promote user to admin
     public User promoteToAdmin(String userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with userId: " + userId));
         user.getRoles().add(Role.ROLE_ADMIN);
         return userRepository.save(user);
     }
 
-    // Delete user
+    // Promote user to analytics
+    public User promoteToAnalytics(String userId) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with userId: " + userId));
+        user.getRoles().add(Role.ROLE_ANALYTICS);
+        return userRepository.save(user);
+    }
+
+    // Delete user by userId
     public void deleteUser(String userId) {
-        userRepository.deleteById(userId);
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with userId: " + userId));
+        userRepository.delete(user);
     }
 }

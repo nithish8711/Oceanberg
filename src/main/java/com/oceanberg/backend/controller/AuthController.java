@@ -2,7 +2,7 @@ package com.oceanberg.backend.controller;
 
 import com.oceanberg.backend.dto.LoginRequest;
 import com.oceanberg.backend.dto.SignupRequest;
-import com.oceanberg.backend.dto.JwtResponse;
+import com.oceanberg.backend.dto.LoginResponse;
 import com.oceanberg.backend.model.User;
 import com.oceanberg.backend.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class AuthController {
 
     // User Login
     @PostMapping("/login")
-    public ResponseEntity<JwtResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
 }

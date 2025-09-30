@@ -17,11 +17,17 @@ public class User {
     @Id
     private String id;
 
-    @Indexed(unique = true)
-    private String username;
+    private String name;
 
     @Indexed(unique = true)
-    private String email;
+    private String userId;   // Unique user login ID
+
+    @Indexed(unique = true)
+    private String email;    // Unique email
+
+    private String state;
+
+    private String district;
 
     private String passwordHash;
 

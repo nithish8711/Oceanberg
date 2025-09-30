@@ -29,7 +29,7 @@ public class UserService {
 
     // Get user by username
     public User getByUsername(String username) {
-        return userRepository.findByUsername(username)
+        return userRepository.findByUserId(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 

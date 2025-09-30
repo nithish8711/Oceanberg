@@ -176,8 +176,8 @@ export default function AdminInboxPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-7xl p-4 md:p-6 space-y-6">
-      <header className="space-y-3">
+    <main className="w-full px-4 py-6 md:px-6 lg:px-8 xl:px-12 space-y-6">
+      <header className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Admin Inbox & Analytics Updates</h1>
@@ -191,7 +191,7 @@ export default function AdminInboxPage() {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
+          <Card className="hover:shadow-lg transition-shadow duration-300">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -202,7 +202,7 @@ export default function AdminInboxPage() {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="hover:shadow-lg transition-shadow duration-300">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -213,7 +213,7 @@ export default function AdminInboxPage() {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="hover:shadow-lg transition-shadow duration-300">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -244,14 +244,14 @@ export default function AdminInboxPage() {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Messages List */}
         <div className="space-y-3">
           <h2 className="text-lg font-semibold">Messages</h2>
           {filteredMessages.map((message) => (
             <Card
               key={message.id}
-              className={`cursor-pointer transition-colors hover:bg-muted/50 ${
+              className={`cursor-pointer transition-all duration-300 hover:bg-muted/50 hover:shadow-md hover:-translate-y-1 ${
                 !message.read ? "border-l-4 border-l-blue-500" : ""
               } ${selectedMessage?.id === message.id ? "ring-2 ring-primary" : ""}`}
               onClick={() => {
@@ -305,7 +305,7 @@ export default function AdminInboxPage() {
         <div className="space-y-3">
           <h2 className="text-lg font-semibold">Message Details</h2>
           {selectedMessage ? (
-            <Card>
+            <Card className="hover:shadow-lg transition-shadow duration-300">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
@@ -399,7 +399,7 @@ export default function AdminInboxPage() {
       </div>
 
       {/* Communication Log */}
-      <Card>
+      <Card className="hover:shadow-lg transition-shadow duration-300">
         <CardHeader>
           <CardTitle>Internal Communication Log</CardTitle>
         </CardHeader>

@@ -19,17 +19,18 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired private UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+        // Now authentication is based on userId (not username/email)
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with userId: " + userId));
 
         Set<GrantedAuthority> authorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.name()))
                 .collect(Collectors.toSet());
 
         return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPasswordHash(),
+                user.getUserId(),       // login identifier
+                user.getPasswordHash(), // encoded password
                 user.isEnabled(),
                 true,
                 true,
