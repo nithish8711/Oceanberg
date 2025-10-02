@@ -66,13 +66,17 @@ Use Postman or HTTP clients to test endpoints like:
 
 Screenshots
 
-<img width="1907" height="896" alt="image" src="https://github.com/user-attachments/assets/557fa395-9592-4ac8-8928-3acbfa6967f5" />
+ <img width="1904" height="863" alt="Screenshot 2025-09-30 153733" src="https://github.com/user-attachments/assets/27243248-8e0b-4660-9f45-3821fb60740f" />
 
 Real-time hazard reporting and mapping dashboard
 
-<img width="1904" height="914" alt="image" src="https://github.com/user-attachments/assets/0472ac7d-3863-4893-b0e8-0c1371ee58ad" />
+<img width="1919" height="897" alt="Screenshot 2025-09-30 131937" src="https://github.com/user-attachments/assets/bb2d8a58-cceb-40bc-8d28-fe4e98b03c9d" />
 
 Early Warning System with location and details
+
+<img width="1892" height="920" alt="Screenshot 2025-09-30 150501" src="https://github.com/user-attachments/assets/94a4805b-45df-4c3a-b757-200a36a0e562" />
+
+Community disaster reporting and verification page
 
 Contributing: 
 
@@ -87,3 +91,18 @@ Fork the repository:
 > Push the branch (git push origin feature-name)
 
 > Open a Pull Request
+
+To run this Project:
+
+add .env.local front end file
+NEXTAUTH_SECRET=your-secret-key
+NEXTAUTH_URL=http://localhost:3000
+NEXT_PUBLIC_BACKEND_URL=http://localhost:8080
+
+Front-End :
+npm install react-leaflet@4
+npm install --save-dev typescript @types/react @types/node
+npm run dev
+
+Backend :
+mvn spring-boot:run
