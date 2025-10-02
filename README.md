@@ -126,6 +126,7 @@ Run Spring Boot backend:
 bash
 Copy code
 mvn spring-boot:run
+
 📜 License
 This project is part of the Oceanberg – Ocean Hazard & Crowdsourcing System.
 Feel free to use and adapt with proper attribution.
