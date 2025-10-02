@@ -94,15 +94,22 @@ Fork the repository:
 
 To run this Project:
 
-add .env.local front end file
+> Add .env.local front end file
+
 NEXTAUTH_SECRET=your-secret-key
+
 NEXTAUTH_URL=http://localhost:3000
+
 NEXT_PUBLIC_BACKEND_URL=http://localhost:8080
 
 Front-End :
+
 npm install react-leaflet@4
+
 npm install --save-dev typescript @types/react @types/node
+
 npm run dev
 
 Backend :
+
 mvn spring-boot:run
